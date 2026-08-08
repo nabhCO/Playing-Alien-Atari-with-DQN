@@ -1,38 +1,50 @@
-import keras
-import tensorflow as tf
-import numpy as np
+import torch
+import torch.nn as nn
 
-#took a lot of inspo from the Keras "Model" class documentation (for creating a subclass specifically)
-class ConvNeuralNet(keras.Model):
+device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
+
+#took a lot of inspo from the PyTorch DQN tutorial for constructing this class
+#resource used for calculating convolution output in references
+class ConvNeuralNet(nn.Module):
 
     def __init__(self):
 
-        super().__init__()
-
-        self.input_layer = keras.Input(shape=(4, 84, 84, 3), batch_size=32)
-        self.conv_layer_1 = keras.layers.Conv2D(filters=16, kernel_size=(8, 8), strides=4, activation="relu")
-        self.conv_layer_2 = keras.layers.Conv2D(filters=32, kernel_size=(4, 4), strides=2, activation="relu")
-        self.dense_hidden_layer = keras.layers.Dense(units=256, activation="relu")
-        self.output_layer = keras.layers.Dense(units = 18, activation = "linear")
-
-    def call(self, input):
-
-        input_layer_output = self.input_layer(input)
-        conv_layer_1_output = self.conv_layer_1(input_layer_output)
-        conv_layer_2_output = self.conv_layer_2(conv_layer_1_output)
-        dense_hidden_layer_output = self.dense_hidden_layer(conv_layer_2_output)
-        return self.output_layer(dense_hidden_layer_output)
+        super(ConvNeuralNet, self).__init__()
+        self.conv_layer_1 = nn.Conv2d(in_channels=4, out_channels=16, kernel_size=8, stride=4)
+        self.conv_layer_2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=4, stride=2)
+        self.dense_layer = nn.Linear(in_features=32 * 9 * 9, out_features=256)
+        self.output_layer = nn.Linear(in_features=256, out_features=18)
 
 
+    #call to pass data through network
+    def forward(self, input):
 
-class DQNAgent:
+        input = torch.nn.functional.relu(self.conv_layer_1(input))
+        print("succeeded layer 1")
+        input = torch.nn.functional.relu(self.conv_layer_2(input))
+        print("succeeded layer 2")
+        input = torch.flatten(input)
+        print("succeeded flatten")
+        input = torch.nn.functional.relu(self.dense_layer(input))
+        print("succeeded layer 3")
+        return self.output_layer(input)
 
-    def __init__(self, gamma, alpha, epsilon):
 
-        #add epsilon decay later
+#testing with an empty tensor (same dimensions as my actual input will be)
+x = torch.empty(4, 84, 84)
 
-        optimizer = keras.optimizers.RMSprop(learning_rate=alpha)
-        loss_fn = keras.losses.MeanSquaredError()
+model = ConvNeuralNet()
+result = model(x)
+print(result)
+    
+        
+
+
+        
+
+
+
+
 
     
 
