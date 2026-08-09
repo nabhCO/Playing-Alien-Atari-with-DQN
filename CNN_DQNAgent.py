@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import random
 import numpy as np
+from collections import namedtuple
 
 device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 
@@ -26,10 +27,13 @@ class ConvNeuralNet(nn.Module):
 
         input = torch.nn.functional.relu(self.conv_layer_1(input))
         input = torch.nn.functional.relu(self.conv_layer_2(input))
-        input = torch.flatten(input, start_dim=1) #flatten before linear layers because we want 1D output
+        input = torch.flatten(input, start_dim=1) #flatten before linear layers
         input = torch.nn.functional.relu(self.dense_layer(input))
         return self.output_layer(input)
     
+
+#named tuple for easier handling of batch tuples and their elements during training
+Experience = namedtuple("Experience", ("state", "action", "reward", "nextState", "complete"))
 
     
 #a replay buffer to draw experiences from during training. experience structure is (state, action, reward, nextState, complete)
