@@ -33,7 +33,7 @@ class ConvNeuralNet(nn.Module):
     
 
 #named tuple for easier handling of batch tuples and their elements during training
-Experience = namedtuple("Experience", ("state", "action", "reward", "nextState", "complete"))
+Experience = namedtuple("Experience", ("state", "action", "reward", "nextState"))
 
     
 #a replay buffer to draw experiences from during training. experience structure is (state, action, reward, nextState, complete)
@@ -49,6 +49,10 @@ class ReplayBuffer:
 
         self.replay_buffer.append(experience)
 
+    def buffer_length(self):
+
+        return len(self.replay_buffer)
+
     #check if the buffer's full
     def buffer_at_capacity(self):
 
@@ -62,8 +66,6 @@ class ReplayBuffer:
 
     
 
-
-        
 
 
 
