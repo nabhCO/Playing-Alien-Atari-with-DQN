@@ -1,5 +1,7 @@
 import torch
 import torchvision
+import numpy as np
+import matplotlib.pyplot as plt
 
 '''
 transform_obs(obs)
@@ -19,3 +21,20 @@ def transform_obs(obs):
     obs = transform(obs)
     obs = torch.permute(obs, (1, 2, 0))
     return obs.unsqueeze(0) #add a dimension at index 0 (this is for batch size)
+
+
+def plot_avg_reward(avg_reward, epochs, num_episodes):
+
+    x_axis = np.array(epochs)
+    y_axis = np.array(avg_reward)
+
+    plt.xlim(0, num_episodes / 10)
+    plt.xticks(np.arange(0, (num_episodes/10) + 1, 10))
+
+    plt.xlabel("Epochs (1 Epoch = 10 Episodes)")
+    plt.ylabel("Average Reward")
+    plt.title(f"Average Rewards Over {num_episodes} Epochs")
+
+    plt.plot(x_axis, y_axis)
+    plt.savefig("avg_reward_over_time.jpg")
+
