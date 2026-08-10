@@ -1,12 +1,11 @@
 import gymnasium as gym
 import torch
 import numpy as np
-from util import transform_obs
+from util import transform_obs, plot_avg_reward
 import hyperparameters
 from class_definitions import ConvNeuralNet, ReplayBuffer, Experience
 from gymnasium.wrappers import ResizeObservation, FrameStackObservation
 from ale_py import ALEInterface
-
 
 '''
 SETUP:
@@ -138,12 +137,22 @@ Steps:
 -Train the model
 -If the agent wins or loses the game, move to next episode
 '''
-
+#for graphing
+epoch_reward = 0
+average_rewards = [0]
+epochs = [0] # i / num of episodes in an epoch
 
 #at start of every episode, reset environment and transform resulting starting observation to a Tensor object
 for i in range(0, hyperparameters.num_episodes):
 
+    if ((i + 1) % 10) == 0:
+
+        average_rewards.append(epoch_reward / 10)
+        epochs.append((i + 1) // 10)
+        epoch_reward = 0
+
     done = False
+    
     obs, info = env.reset()
     obs = transform_obs(obs)
     
@@ -160,6 +169,7 @@ for i in range(0, hyperparameters.num_episodes):
 
         #take step using action in the environment
         next_obs, reward, terminated, truncated, info = env.step(action)
+        epoch_reward += reward
         reward = torch.tensor([reward])
 
         #get nextState and transform (if next state complete, set to None and do not transform)
@@ -187,6 +197,10 @@ for i in range(0, hyperparameters.num_episodes):
 
 
 print("Success")
+
+#save the model- remember to change the filename for different experiments
+torch.save(model.state_dict(), "experiment_1.pth")
+plot_avg_reward(average_rewards, epochs, hyperparameters.num_episodes)
 
 
 
