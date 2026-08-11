@@ -141,6 +141,7 @@ Steps:
 epoch_reward = 0
 average_rewards = [0]
 epochs = [0] # i / num of episodes in an epoch
+decay_count = 0
 
 #at start of every episode, reset environment and transform resulting starting observation to a Tensor object
 for i in range(0, hyperparameters.num_episodes):
@@ -150,6 +151,14 @@ for i in range(0, hyperparameters.num_episodes):
         average_rewards.append(epoch_reward / 10)
         epochs.append((i + 1) // 10)
         epoch_reward = 0
+        decay_count += 10
+        print(f"Epoch {(i + 1) // 10} complete")
+
+    if (decay_count == 20) and (hyperparameters.epsilon - hyperparameters.epsilon_decay) >= 0.1:
+
+        hyperparameters.epsilon = hyperparameters.epsilon - hyperparameters.epsilon_decay
+        decay_count = 0
+        print("Epsilon Decay")
 
     done = False
     
@@ -161,12 +170,7 @@ for i in range(0, hyperparameters.num_episodes):
 
         #choose an action and update epsilon after decay (if not already 0.1)
         action = choose_action(obs, hyperparameters.epsilon)
-        value_after_decay = hyperparameters.epsilon - (hyperparameters.epsilon * hyperparameters.epsilon_decay)
-
-        if value_after_decay > 0.1:
-            hyperparameters.epsilon = value_after_decay
         
-
         #take step using action in the environment
         next_obs, reward, terminated, truncated, info = env.step(action)
         epoch_reward += reward
@@ -199,7 +203,6 @@ for i in range(0, hyperparameters.num_episodes):
 print("Success")
 
 #save the model- remember to change the filename for different experiments
-torch.save(model.state_dict(), "experiment_1.pth")
 plot_avg_reward(average_rewards, epochs, hyperparameters.num_episodes)
 
 

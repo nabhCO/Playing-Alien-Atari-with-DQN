@@ -22,14 +22,23 @@ def transform_obs(obs):
     obs = torch.permute(obs, (1, 2, 0))
     return obs.unsqueeze(0) #add a dimension at index 0 (this is for batch size)
 
+'''
+plot_avg_reward(avg_reward, epochs, num_episodes)
+Parameters:
+-avg_reward (array of average rewards across epochs)
+-epochs (number of epochs)
+-num_episodes (number of episodes)
 
+Description:
+Plots the average reward per epoch
+'''
 def plot_avg_reward(avg_reward, epochs, num_episodes):
 
     x_axis = np.array(epochs)
     y_axis = np.array(avg_reward)
 
     plt.xlim(0, num_episodes / 10)
-    plt.xticks(np.arange(0, (num_episodes/10) + 1, 10))
+    plt.xticks(np.arange(0, (num_episodes/10) + 1, 1))
 
     plt.xlabel("Epochs (1 Epoch = 10 Episodes)")
     plt.ylabel("Average Reward")
